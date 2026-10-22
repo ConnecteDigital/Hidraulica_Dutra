@@ -17,7 +17,7 @@ import { site } from '../data/site';
 <style is:global>
   .intro { display: none; }
   html.intro-on .intro {
-    display: block; position: fixed; inset: 0; z-index: 200; background: #061127;
+    display: block; position: fixed; inset: 0; z-index: 200; background: #101113;
     transition: opacity .45s ease;
   }
   .intro.is-fading { opacity: 0; }
@@ -29,22 +29,30 @@ import { site } from '../data/site';
   .intro-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .intro::after {
     content: ''; position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, .55) 100%);
+    background: radial-gradient(120% 90% at 50% 45%, transparent 50%, rgba(0, 0, 0, .65) 100%);
   }
   .intro-caption {
-    position: absolute; left: 0; right: 0; bottom: 14vh; text-align: center; pointer-events: none;
+    position: absolute; left: 0; right: 0; top: 54%; text-align: center; pointer-events: none;
     font-family: var(--font-display); text-transform: uppercase; color: #fff; padding: 0 20px;
   }
+  .intro-caption::before {
+    content: ''; position: absolute; left: 50%; top: 0; width: 120%; height: 9em;
+    transform: translate(-50%, -50%); font-size: clamp(1rem, 4vw, 1.6rem);
+    background: radial-gradient(closest-side, rgba(5, 8, 14, .55), transparent);
+    opacity: 0; transition: opacity .45s ease;
+  }
+  .intro[data-stage] .intro-caption::before { opacity: 1; }
   .cap {
-    position: absolute; left: 0; right: 0; margin: 0; opacity: 0; transform: translateY(12px);
+    position: absolute; left: 0; right: 0; top: 0; margin: 0; padding: 0 20px; opacity: 0;
+    transform: translateY(calc(-50% + 12px));
     transition: opacity .45s ease, transform .45s ease;
-    font-size: clamp(2rem, 8vw, 3.6rem); font-weight: 800; letter-spacing: .02em;
-    text-shadow: 0 6px 30px rgba(0, 0, 0, .6);
+    font-size: clamp(2.6rem, 11vw, 4.6rem); font-weight: 800; line-height: 1.02; letter-spacing: .02em;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, .75), 0 1px 3px rgba(0, 0, 0, .6);
   }
   .cap strong { color: #5fd0ff; }
   .intro[data-stage='leak'] .cap-leak,
   .intro[data-stage='fix'] .cap-fix,
-  .intro[data-stage='ok'] .cap-ok { opacity: 1; transform: none; }
+  .intro[data-stage='ok'] .cap-ok { opacity: 1; transform: translateY(-50%); }
   .intro-skip {
     position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px;
     background: rgba(255, 255, 255, .1); color: #fff; border: 1px solid rgba(255, 255, 255, .25);
@@ -52,62 +60,3 @@ import { site } from '../data/site';
   }
   .intro-skip:hover { background: rgba(255, 255, 255, .2); }
 </style>
-
-<script>
-  const root = document.documentElement;
-  const intro = document.getElementById('intro');
-
-  function finish() {
-    root.classList.remove('intro-on');
-    intro?.remove();
-  }
-
-  if (intro && root.classList.contains('intro-on')) {
-    try {
-      sessionStorage.setItem('introVista', '1');
-    } catch {}
-
-    const canvas = intro.querySelector('canvas')!;
-    const skipBtn = intro.querySelector<HTMLButtonElement>('.intro-skip')!;
-    let closed = false;
-    let dispose: (() => void) | undefined;
-
-    function close(fade: boolean) {
-      if (closed) return;
-      closed = true;
-      window.clearTimeout(fallback);
-      const end = () => {
-        dispose?.();
-        finish();
-      };
-      if (!fade) return end();
-      intro!.classList.add('is-fading');
-      window.setTimeout(end, 450);
-    }
-
-    // Se o 3D demorar para carregar (rede lenta), mostra o site direto
-    const fallback = window.setTimeout(() => close(true), 3500);
-    skipBtn.addEventListener('click', () => close(true));
-
-    // O site aparece de cima para baixo, acompanhando o cano que desce
-    function reveal(px: number) {
-      const mask = `linear-gradient(to bottom, transparent ${px - 70}px, #000 ${px}px)`;
-      intro!.style.setProperty('mask-image', mask);
-      intro!.style.setProperty('-webkit-mask-image', mask);
-      intro!.classList.add('is-revealing');
-    }
-
-    import('../scripts/intro-scene')
-      .then(({ startIntro }) => {
-        if (closed) return;
-        window.clearTimeout(fallback);
-        const handle = startIntro(canvas, {
-          onStage: (stage) => (intro.dataset.stage = stage),
-          onReveal: reveal,
-        });
-        dispose = handle.dispose;
-        handle.done.then(() => close(false));
-      })
-      .catch(() => close(true));
-  }
-</script>

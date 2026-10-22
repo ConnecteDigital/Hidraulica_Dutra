@@ -15,6 +15,8 @@ export interface IntroHandle {
 }
 
 export interface IntroCallbacks {
+  // Cena preparada (shaders compilados, qualidade escolhida) e já tocando
+  onReady: () => void;
   onStage: (stage: IntroStage) => void;
   // Altura (px, do topo da tela) até onde o site já está revelado
   onReveal: (px: number) => void;
@@ -49,24 +51,36 @@ function canvasTexture(size: number, draw: (g: CanvasRenderingContext2D, s: numb
   return tex;
 }
 
-function concrete(g: CanvasRenderingContext2D, s: number, base: number) {
-  g.fillStyle = `rgb(${base},${base},${base + 4})`;
+// Azulejos/porcelanato com rejunte. bump=true gera o relevo (rejunte escuro)
+function tiles(
+  g: CanvasRenderingContext2D,
+  s: number,
+  cols: number,
+  base: [number, number, number],
+  grout: string,
+  groutPx: number,
+  bump = false,
+) {
+  const step = s / cols;
+  g.fillStyle = bump ? '#000' : grout;
   g.fillRect(0, 0, s, s);
-  for (let i = 0; i < 60; i++) {
-    const x = Math.random() * s;
-    const y = Math.random() * s;
-    const r = 20 + Math.random() * 90;
-    const v = base + (Math.random() - 0.5) * 30;
-    const grad = g.createRadialGradient(x, y, 0, x, y, r);
-    grad.addColorStop(0, `rgba(${v},${v},${v + 3},0.35)`);
-    grad.addColorStop(1, `rgba(${v},${v},${v},0)`);
-    g.fillStyle = grad;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-  }
-  for (let i = 0; i < 9000; i++) {
-    const v = base + (Math.random() - 0.5) * 70;
-    g.fillStyle = `rgba(${v},${v},${v},${Math.random() * 0.5})`;
-    g.fillRect(Math.random() * s, Math.random() * s, 1 + Math.random() * 2, 1 + Math.random() * 2);
+  for (let y = 0; y < cols; y++) {
+    for (let x = 0; x < cols; x++) {
+      const v = bump ? 0 : (Math.random() - 0.5) * 10;
+      g.fillStyle = bump ? '#fff' : `rgb(${base[0] + v},${base[1] + v},${base[2] + v})`;
+      g.fillRect(x * step + groutPx / 2, y * step + groutPx / 2, step - groutPx, step - groutPx);
+      if (!bump) {
+        // veios suaves de porcelanato
+        for (let k = 0; k < 6; k++) {
+          g.strokeStyle = `rgba(255,255,255,${0.04 + Math.random() * 0.05})`;
+          g.lineWidth = 1 + Math.random() * 3;
+          g.beginPath();
+          g.moveTo(x * step + Math.random() * step, y * step);
+          g.bezierCurveTo(x * step + Math.random() * step, y * step + step * 0.4, x * step + Math.random() * step, y * step + step * 0.6, x * step + Math.random() * step, y * step + step);
+          g.stroke();
+        }
+      }
+    }
   }
 }
 
@@ -180,13 +194,15 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   renderer.setPixelRatio(dpr);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 0.82;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  // a refração da água é calculada em meia resolução (imperceptível, bem mais leve)
+  renderer.transmissionResolutionScale = 0.5;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x05070b);
-  scene.fog = new THREE.FogExp2(0x05070b, 0.09);
+  scene.background = new THREE.Color(0x0b0c0e);
+  scene.fog = new THREE.FogExp2(0x0b0c0e, 0.085);
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   const env = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
@@ -196,43 +212,48 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.05, 60);
 
   // ---------- luz ----------
-  const key = new THREE.SpotLight(0xfff1dd, 45, 18, 0.5, 0.65, 1.6);
+  const key = new THREE.SpotLight(0xffe6c8, 55, 18, 0.6, 0.7, 1.6);
   key.position.set(2.5, 4.2, 3.2);
   key.castShadow = true;
   key.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
   key.shadow.bias = -0.0004;
   key.shadow.normalBias = 0.02;
   scene.add(key, key.target);
-  const fill = new THREE.PointLight(0x3d8bff, 6, 9, 1.6);
+  const fill = new THREE.PointLight(0x9cc4ff, 5, 9, 1.6);
   fill.position.set(-2.4, 0.4, 1.8);
   scene.add(fill);
-  scene.add(new THREE.HemisphereLight(0x8fb4ff, 0x0b0b0b, 0.15));
+  // luz de teto do banheiro
+  const ceiling = new THREE.PointLight(0xfff4e6, 3, 12, 1.4);
+  ceiling.position.set(-0.5, 4, 1.5);
+  scene.add(ceiling);
+  scene.add(new THREE.HemisphereLight(0xf2f5ff, 0x2a2622, 0.1));
 
   // ---------- ambiente ----------
   const PIPE_Y = 0;
   const FLOOR_Y = -1.55;
   const WALL_Z = -0.75;
 
-  const wallMap = canvasTexture(512, (g, s) => concrete(g, s, 118), true);
-  wallMap.repeat.set(3, 2);
-  const wallBump = canvasTexture(512, (g, s) => concrete(g, s, 128));
-  wallBump.repeat.set(3, 2);
+  // parede de azulejo branco (cada peça ~1,2 unidade)
+  const wallMap = canvasTexture(512, (g, s) => tiles(g, s, 4, [196, 202, 208], '#80868d', 7), true);
+  const wallBump = canvasTexture(512, (g, s) => tiles(g, s, 4, [0, 0, 0], '', 7, true));
+  for (const tx of [wallMap, wallBump]) tx.repeat.set(14 / 4.8, 8 / 4.8);
   const wall = new THREE.Mesh(
     new THREE.PlaneGeometry(14, 8),
-    new THREE.MeshStandardMaterial({ map: wallMap, bumpMap: wallBump, bumpScale: 2.5, roughness: 0.92, color: 0x9aa3b0 }),
+    new THREE.MeshStandardMaterial({ map: wallMap, bumpMap: wallBump, bumpScale: 1.2, roughness: 0.18 }),
   );
   wall.position.set(0, 1.4, WALL_Z);
   wall.receiveShadow = true;
   scene.add(wall);
 
-  const floorMap = canvasTexture(512, (g, s) => concrete(g, s, 70), true);
-  floorMap.repeat.set(4, 4);
-  const floorMat = new THREE.MeshPhysicalMaterial({
+  // piso de porcelanato (peças grandes), que fica brilhante quando molha
+  const floorMap = canvasTexture(512, (g, s) => tiles(g, s, 2, [118, 114, 108], '#4f4b47', 5), true);
+  const floorBump = canvasTexture(512, (g, s) => tiles(g, s, 2, [0, 0, 0], '', 5, true));
+  for (const tx of [floorMap, floorBump]) tx.repeat.set(14 / 6, 10 / 6);
+  const floorMat = new THREE.MeshStandardMaterial({
     map: floorMap,
-    color: 0x6b7280,
-    roughness: 0.55,
-    clearcoat: 0,
-    clearcoatRoughness: 0.08,
+    bumpMap: floorBump,
+    bumpScale: 0.8,
+    roughness: 0.4,
   });
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 10), floorMat);
   floor.rotation.x = -Math.PI / 2;
@@ -240,10 +261,87 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // poça: espelho d'água escuro que cresce
+  // rodapé de azulejo
+  const skirting = new THREE.Mesh(new THREE.BoxGeometry(14, 0.18, 0.05), new THREE.MeshStandardMaterial({ color: 0xdfe3e8, roughness: 0.25 }));
+  skirting.position.set(0, FLOOR_Y + 0.09, WALL_Z + 0.025);
+  skirting.receiveShadow = true;
+  scene.add(skirting);
+
+  const chrome = new THREE.MeshPhysicalMaterial({ color: 0xf2f4f7, metalness: 1, roughness: 0.08 });
+  const porcelain = new THREE.MeshPhysicalMaterial({ color: 0xf6f7f9, roughness: 0.15, clearcoat: 1, clearcoatRoughness: 0.05 });
+
+  // ralo de inox no piso, perto de onde a água cai
+  const drain = new THREE.Group();
+  const plate = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.02, 0.62), chrome);
+  drain.add(plate);
+  for (let i = 0; i < 6; i++) {
+    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.022, 0.035), new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 1 }));
+    slot.position.z = -0.2 + i * 0.08;
+    drain.add(slot);
+  }
+  drain.position.set(1.15, FLOOR_Y + 0.01, 1.0);
+  drain.traverse((o) => ((o as THREE.Mesh).receiveShadow = true));
+  scene.add(drain);
+
+  // coluna de louça da pia, à esquerda
+  const pedestalProfile = [
+    new THREE.Vector2(0.0, 0),
+    new THREE.Vector2(0.62, 0),
+    new THREE.Vector2(0.58, 0.12),
+    new THREE.Vector2(0.42, 0.6),
+    new THREE.Vector2(0.36, 2.2),
+    new THREE.Vector2(0.4, 3.6),
+    new THREE.Vector2(0.0, 3.6),
+  ];
+  const pedestal = new THREE.Mesh(new THREE.LatheGeometry(pedestalProfile, 48), porcelain);
+  pedestal.position.set(-2.55, FLOOR_Y, WALL_Z + 0.55);
+  pedestal.castShadow = pedestal.receiveShadow = true;
+  scene.add(pedestal);
+  // cuba da pia (só a parte de baixo aparece no alto do quadro)
+  const basin = new THREE.Mesh(new THREE.SphereGeometry(1.5, 48, 24, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), porcelain);
+  basin.scale.set(1.2, 0.55, 0.85);
+  basin.position.set(-2.55, FLOOR_Y + 4.25, WALL_Z + 0.95);
+  basin.castShadow = true;
+  scene.add(basin);
+
+  // derivação com registro cromado e flexível trançado subindo para a pia
+  const tee = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.55, 24), chrome);
+  tee.position.set(-1.35, 0.27, 0);
+  const valve = new THREE.Mesh(new THREE.SphereGeometry(0.14, 24, 16), chrome);
+  valve.position.set(-1.35, 0.6, 0);
+  const valveKnob = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.05, 6), chrome);
+  valveKnob.rotation.x = Math.PI / 2;
+  valveKnob.position.set(-1.35, 0.6, 0.16);
+  const hosePath = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-1.35, 0.72, 0),
+    new THREE.Vector3(-1.4, 1.4, 0.15),
+    new THREE.Vector3(-1.9, 2.3, 0.6),
+    new THREE.Vector3(-2.3, 2.8, 1.0),
+  ]);
+  const braidTex = canvasTexture(64, (g, s) => {
+    g.fillStyle = '#8b9199';
+    g.fillRect(0, 0, s, s);
+    g.strokeStyle = '#e6e9ee';
+    g.lineWidth = 3;
+    for (let i = -s; i < s * 2; i += 8) {
+      g.beginPath();
+      g.moveTo(i, 0);
+      g.lineTo(i + s, s);
+      g.moveTo(i + s, 0);
+      g.lineTo(i, s);
+      g.stroke();
+    }
+  }, true);
+  braidTex.repeat.set(40, 2);
+  const hose = new THREE.Mesh(new THREE.TubeGeometry(hosePath, 48, 0.055, 12), new THREE.MeshStandardMaterial({ map: braidTex, metalness: 0.8, roughness: 0.4 }));
+  const hoseGroup = new THREE.Group();
+  hoseGroup.add(tee, valve, valveKnob, hose);
+  hoseGroup.traverse((o) => ((o as THREE.Mesh).castShadow = true));
+
+  // poça: lâmina d'água espelhada que cresce no piso
   const puddle = new THREE.Mesh(
     new THREE.CircleGeometry(1, 64),
-    new THREE.MeshPhysicalMaterial({ color: 0x0c1a2a, roughness: 0.02, metalness: 0.1, clearcoat: 1, transparent: true, opacity: 0.85 }),
+    new THREE.MeshPhysicalMaterial({ color: 0x8fa6b8, roughness: 0.02, metalness: 0.2, clearcoat: 1, transparent: true, opacity: 0.45 }),
   );
   puddle.rotation.x = -Math.PI / 2;
   puddle.position.set(0.15, FLOOR_Y + 0.002, 0.55);
@@ -298,9 +396,11 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     if ((o as THREE.Mesh).isMesh) o.castShadow = true;
   });
 
+  pipeRig.add(hoseGroup);
+
   // abraçadeiras presas na parede segurando o cano
   const strapMat = new THREE.MeshStandardMaterial({ color: 0x2a2f37, metalness: 0.8, roughness: 0.45 });
-  for (const x of [-2.4, 2.4]) {
+  for (const x of [-1.85, 1.9]) {
     const strap = new THREE.Mesh(new THREE.TorusGeometry(0.19, 0.025, 10, 32, Math.PI), strapMat);
     strap.position.set(x, 0, 0);
     strap.rotation.y = Math.PI / 2;
@@ -331,10 +431,10 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     metalness: 0,
     roughness: 0.02,
     transmission: 1,
-    thickness: 0.04,
+    thickness: 0.08,
     ior: 1.33,
-    attenuationColor: new THREE.Color(0x9fdcff),
-    attenuationDistance: 0.4,
+    attenuationColor: new THREE.Color(0x8fd0ff),
+    attenuationDistance: 0.35,
     specularIntensity: 1,
     envMapIntensity: 1.6,
   });
@@ -435,7 +535,6 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   // ---------- pós-processamento ----------
   const bokeh = new BokehPass(scene, camera, { focus: 1.8, aperture: small ? 0.006 : 0.008, maxblur: 0.012 });
   const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.25, 0.4, 1.8);
-  let effectsOn = true;
   renderer.setEffects([bokeh]);
 
   // ---------- câmera: planos do roteiro ----------
@@ -488,7 +587,6 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   timer.connect(document);
   let elapsed = 0;
   let frames = 0;
-  let slowFrames = 0;
   let spawnAcc = 0;
   let dripAcc = 0;
   let stage: IntroStage | '' = '';
@@ -510,22 +608,6 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     // os primeiros quadros incluem a compilação dos shaders; não contam no roteiro
     const raw = frames < 2 ? 0 : timer.getDelta();
     frames++;
-    // qualidade adaptativa: em aparelho fraco desliga desfoque/brilho e reduz resolução
-    if (frames > 8 && frames < 60 && raw > 1 / 26) slowFrames++;
-    if (effectsOn && slowFrames > 12 && !fixedStep) {
-      effectsOn = false;
-      renderer.setEffects([]);
-      // água sem refração: bem mais barata em GPU fraca
-      waterMat.transmission = 0;
-      waterMat.transparent = true;
-      waterMat.opacity = 0.75;
-      waterMat.color.set(0xcfeeff);
-      waterMat.needsUpdate = true;
-      renderer.shadowMap.autoUpdate = false;
-      dpr = Math.min(dpr, 1);
-      renderer.setPixelRatio(dpr);
-      renderer.setSize(window.innerWidth, window.innerHeight, false);
-    }
     const realDt = fixedStep ? (frames > 2 ? fixedStep : 0) : raw * speed;
     const dt = Math.min(realDt, 1 / 30);
     elapsed += realDt;
@@ -658,8 +740,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     const wet = clamp01((t - T.leakStart - 0.3) * 0.45);
     puddle.scale.set(0.2 + wet * 1.6, 0.2 + wet * 1.25, 1);
     puddle.visible = wet > 0;
-    floorMat.clearcoat = wet * 0.8;
-    floorMat.roughness = 0.55 - wet * 0.25;
+    floorMat.roughness = 0.4 - wet * 0.3;
 
     renderer.render(scene, camera);
 
@@ -674,9 +755,75 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
       resolveDone();
     }
   }
-  renderer.setAnimationLoop(frame);
+  // Qualidade reduzida para GPU fraca: sem desfoque, água sem refração, menos pixels
+  function lowQuality() {
+    renderer.setEffects([]);
+    waterMat.transmission = 0;
+    waterMat.transparent = true;
+    waterMat.opacity = 0.75;
+    waterMat.color.set(0xcfeeff);
+    waterMat.needsUpdate = true;
+    dpr = Math.min(dpr, 1);
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+  }
+
+  // Antes de mostrar: deixa tudo visível, compila todos os shaders, aloca sombras e
+  // buffers de refração e mede o aparelho. Assim nada é preparado no meio da animação.
+  let disposed = false;
+  async function prepare() {
+    canvas.style.opacity = '0';
+    wrenchPivot.visible = true;
+    puddle.visible = true;
+    for (const r of ripples) r.mesh.visible = true;
+    placeCamera(0, 0);
+    for (let i = 0; i < 24; i++) {
+      tmp.set(0.2 + i * 0.01, -0.1 - i * 0.02, 0.4);
+      pipeRig.localToWorld(tmp);
+      dummy.position.copy(tmp);
+      dummy.scale.setScalar(0.02);
+      dummy.updateMatrix();
+      drops.setMatrixAt(i, dummy.matrix);
+    }
+    drops.instanceMatrix.needsUpdate = true;
+    try {
+      await renderer.compileAsync(scene, camera);
+    } catch {
+      /* segue com a compilação síncrona do primeiro quadro */
+    }
+    if (disposed) return;
+    const nextFrame = () => new Promise<number>((r) => requestAnimationFrame(r));
+    renderer.render(scene, camera);
+    await nextFrame();
+    // mede alguns quadros completos já com tudo compilado
+    let last = await nextFrame();
+    let total = 0;
+    for (let i = 0; i < 4; i++) {
+      renderer.render(scene, camera);
+      const now = await nextFrame();
+      total += now - last;
+      last = now;
+    }
+    if (disposed) return;
+    if (!fixedStep && total / 4 > 34) {
+      lowQuality();
+      renderer.render(scene, camera);
+      await nextFrame();
+    }
+    for (const r of ripples) r.mesh.visible = false;
+    puddle.visible = false;
+    wrenchPivot.visible = false;
+    if (disposed) return;
+    canvas.style.transition = 'opacity .25s ease';
+    canvas.style.opacity = '1';
+    timer.reset();
+    renderer.setAnimationLoop(frame);
+    cb.onReady();
+  }
+  prepare();
 
   function dispose() {
+    disposed = true;
     renderer.setAnimationLoop(null);
     window.removeEventListener('resize', layout);
     timer.dispose();
