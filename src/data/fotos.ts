@@ -7,6 +7,8 @@ const arquivos = import.meta.glob<{ default: ImageMetadata }>('../assets/fotos/*
 const alts: Record<string, string> = {
   desentupimento: 'Encanador da Hidráulica Dutra usando máquina de desentupimento em um imóvel',
   'conserto-de-tubulacao-pvc': 'Conserto de tubulação PVC embutida com registro novo instalado na parede',
+  'furo-em-cano-pvc': 'Cano PVC furado consertado com conexões novas dentro da parede',
+  'furo-em-cano-de-cobre': 'Canos de cobre emendados com luvas de latão após conserto de furo',
   'conserto-de-cano-ppr': 'Trecho de cano trocado dentro da parede durante conserto de vazamento',
   'conserto-de-tubulacao-cpvc': 'Conexão nova instalada em tubulação de água após conserto',
   'conserto-de-prumada-pvc': 'Prumada de PVC aberta na parede com trecho substituído',
