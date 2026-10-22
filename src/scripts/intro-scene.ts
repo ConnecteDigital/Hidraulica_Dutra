@@ -49,6 +49,16 @@ function canvasTexture(size: number, draw: (g: CanvasRenderingContext2D, s: numb
   return tex;
 }
 
+// Gerador pseudoaleatório com semente: as texturas saem sempre iguais, para a
+// cena ao vivo bater exatamente com a imagem de capa (poster) da abertura.
+let seed = 0;
+function rand() {
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
 // Azulejos/porcelanato com rejunte. bump=true gera o relevo (rejunte escuro)
 function tiles(
   g: CanvasRenderingContext2D,
@@ -64,17 +74,17 @@ function tiles(
   g.fillRect(0, 0, s, s);
   for (let y = 0; y < cols; y++) {
     for (let x = 0; x < cols; x++) {
-      const v = bump ? 0 : (Math.random() - 0.5) * 10;
+      const v = bump ? 0 : (rand() - 0.5) * 10;
       g.fillStyle = bump ? '#fff' : `rgb(${base[0] + v},${base[1] + v},${base[2] + v})`;
       g.fillRect(x * step + groutPx / 2, y * step + groutPx / 2, step - groutPx, step - groutPx);
       if (!bump) {
         // veios suaves de porcelanato
         for (let k = 0; k < 6; k++) {
-          g.strokeStyle = `rgba(255,255,255,${0.04 + Math.random() * 0.05})`;
-          g.lineWidth = 1 + Math.random() * 3;
+          g.strokeStyle = `rgba(255,255,255,${0.04 + rand() * 0.05})`;
+          g.lineWidth = 1 + rand() * 3;
           g.beginPath();
-          g.moveTo(x * step + Math.random() * step, y * step);
-          g.bezierCurveTo(x * step + Math.random() * step, y * step + step * 0.4, x * step + Math.random() * step, y * step + step * 0.6, x * step + Math.random() * step, y * step + step);
+          g.moveTo(x * step + rand() * step, y * step);
+          g.bezierCurveTo(x * step + rand() * step, y * step + step * 0.4, x * step + rand() * step, y * step + step * 0.6, x * step + rand() * step, y * step + step);
           g.stroke();
         }
       }
@@ -170,9 +180,9 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
-    powerPreference: 'high-performance',
   });
-  let dpr = Math.min(window.devicePixelRatio, small ? 1.5 : 2);
+  let dpr = Math.min(window.devicePixelRatio, 1.5);
+  seed = 7;
   renderer.setPixelRatio(dpr);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -195,7 +205,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   const key = new THREE.SpotLight(0xffe6c8, 55, 18, 0.6, 0.7, 1.6);
   key.position.set(2.5, 4.2, 3.2);
   key.castShadow = true;
-  key.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
+  key.shadow.mapSize.set(1024, 1024);
   key.shadow.bias = -0.0004;
   key.shadow.normalBias = 0.02;
   scene.add(key, key.target);
@@ -559,7 +569,8 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     // os primeiros quadros incluem a compilação dos shaders; não contam no roteiro
     const raw = frames < 2 ? 0 : timer.getDelta();
     frames++;
-    const realDt = fixedStep ? (frames > 2 ? fixedStep : 0) : raw * speed;
+    // passo máximo de 1/20 s: se o aparelho engasgar, a animação espera em vez de pular
+    const realDt = fixedStep ? (frames > 2 ? fixedStep : 0) : Math.min(raw, 1 / 20) * speed;
     const dt = Math.min(realDt, 1 / 30);
     elapsed += realDt;
     const t = elapsed;

@@ -61,6 +61,14 @@ const posts = (await getCollection('blog'))
         if (!('WebGL2RenderingContext' in window)) return;
         var root = document.documentElement;
         root.classList.add('intro-on');
+        // baixa a capa da abertura antes de tudo
+        var portrait = window.matchMedia('(max-aspect-ratio: 9/10)').matches;
+        var link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = portrait ? '/intro/poster-m.webp' : '/intro/poster-d.webp';
+        link.setAttribute('fetchpriority', 'high');
+        document.head.appendChild(link);
         // trava de segurança: se o script da cena não rodar, o site aparece
         if (!/introStep/.test(location.search)) setTimeout(function () {
           if (!root.classList.contains('intro-ready')) root.classList.remove('intro-on');
