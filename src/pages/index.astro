@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import HeroVisual from '../components/HeroVisual.astro';
 import CtaButtons from '../components/CtaButtons.astro';
 import CtaBand from '../components/CtaBand.astro';
 import ServiceCard from '../components/ServiceCard.astro';
@@ -78,23 +77,30 @@ const posts = (await getCollection('blog'))
   </script>
   <Intro3DScript slot="head" />
   <Intro3D />
-  <section class="hero">
-    <div class="container hero-grid">
-      <div>
-        <span class="eyebrow">Encanador em São Paulo · Plantão 24h</span>
-        <h1>Encanador 24 horas em São Paulo: <em>chegamos em até {site.arrivalMinutes} minutos</em></h1>
-        <p class="hero-lead">
-          Vazamento, cano furado, entupimento ou registro com defeito? A Hidráulica Dutra resolve hoje, a qualquer hora,
-          com encanadores experientes e garantia no serviço.
-        </p>
-        <CtaButtons />
-        <ul class="hero-badges">
-          <li><Icon name="clock" size={18} /> Atendimento 24h</li>
-          <li><Icon name="bolt" size={18} /> Chegada em até {site.arrivalMinutes} min</li>
-          <li><Icon name="shield" size={18} /> Serviço com garantia</li>
-        </ul>
-      </div>
-      <HeroVisual />
+  <section class="hero hero-home">
+    {
+      fotoEquipe && (
+        <Image
+          class="hero-bg"
+          src={fotoEquipe.src}
+          alt=""
+          widths={[480, 800, 1200, 1600]}
+          sizes="100vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+      )
+    }
+    <div class="container hero-center">
+      <span class="eyebrow">Encanador em São Paulo · Plantão 24h</span>
+      <h1>Encanador 24 horas em São Paulo: <em>chegamos em até {site.arrivalMinutes} minutos</em></h1>
+      <p class="hero-lead">Vazamento, cano furado ou entupimento? Resolvemos hoje, a qualquer hora, com garantia.</p>
+      <CtaButtons />
+      <ul class="hero-badges">
+        <li><Icon name="clock" size={22} /> <span>Atendimento 24h</span></li>
+        <li><Icon name="bolt" size={22} /> <span>Chegada em até {site.arrivalMinutes} min</span></li>
+        <li><Icon name="shield" size={22} /> <span>Serviço com garantia</span></li>
+      </ul>
     </div>
   </section>
 
