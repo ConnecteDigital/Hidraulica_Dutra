@@ -40,7 +40,7 @@
 
     // Se a cena não ficar pronta a tempo (aparelho muito lento), mostra o site direto
     const review = new URLSearchParams(location.search).has('introStep');
-    const fallback = review ? 0 : window.setTimeout(() => close(true), 3000);
+    const fallback = review ? 0 : window.setTimeout(() => close(true), 4500);
     skipBtn.addEventListener('click', () => close(true));
 
     // O site aparece de cima para baixo, acompanhando o cano que desce

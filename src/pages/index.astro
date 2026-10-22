@@ -64,7 +64,7 @@ const posts = (await getCollection('blog'))
         // trava de segurança: se o script da cena não rodar, o site aparece
         if (!/introStep/.test(location.search)) setTimeout(function () {
           if (!root.classList.contains('intro-ready')) root.classList.remove('intro-on');
-        }, 6000);
+        }, 8000);
       } catch (e) {}
     })();
   </script>

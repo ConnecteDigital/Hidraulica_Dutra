@@ -3,8 +3,6 @@
 // vazamento para e o cano desce, revelando o site por trás da cena.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 export type IntroStage = 'leak' | 'fix' | 'ok';
 
@@ -81,21 +79,6 @@ function tiles(
         }
       }
     }
-  }
-}
-
-function brushed(g: CanvasRenderingContext2D, s: number) {
-  g.fillStyle = 'rgb(90,90,90)';
-  g.fillRect(0, 0, s, s);
-  for (let i = 0; i < 1400; i++) {
-    const v = 60 + Math.random() * 90;
-    g.strokeStyle = `rgba(${v},${v},${v},0.35)`;
-    g.lineWidth = Math.random() * 1.5;
-    const y = Math.random() * s;
-    g.beginPath();
-    g.moveTo(0, y);
-    g.lineTo(s, y + (Math.random() - 0.5) * 2);
-    g.stroke();
   }
 }
 
@@ -188,7 +171,6 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     canvas,
     antialias: true,
     powerPreference: 'high-performance',
-    outputBufferType: THREE.HalfFloatType,
   });
   let dpr = Math.min(window.devicePixelRatio, small ? 1.5 : 2);
   renderer.setPixelRatio(dpr);
@@ -197,8 +179,6 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   renderer.toneMappingExposure = 0.82;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
-  // a refração da água é calculada em meia resolução (imperceptível, bem mais leve)
-  renderer.transmissionResolutionScale = 0.5;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0b0c0e);
@@ -267,8 +247,8 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   skirting.receiveShadow = true;
   scene.add(skirting);
 
-  const chrome = new THREE.MeshPhysicalMaterial({ color: 0xf2f4f7, metalness: 1, roughness: 0.08 });
-  const porcelain = new THREE.MeshPhysicalMaterial({ color: 0xf6f7f9, roughness: 0.15, clearcoat: 1, clearcoatRoughness: 0.05 });
+  const chrome = new THREE.MeshStandardMaterial({ color: 0xf2f4f7, metalness: 1, roughness: 0.1 });
+  const porcelain = new THREE.MeshStandardMaterial({ color: 0xf6f7f9, roughness: 0.12 });
 
   // ralo de inox no piso, perto de onde a água cai
   const drain = new THREE.Group();
@@ -318,22 +298,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     new THREE.Vector3(-1.9, 2.3, 0.6),
     new THREE.Vector3(-2.3, 2.8, 1.0),
   ]);
-  const braidTex = canvasTexture(64, (g, s) => {
-    g.fillStyle = '#8b9199';
-    g.fillRect(0, 0, s, s);
-    g.strokeStyle = '#e6e9ee';
-    g.lineWidth = 3;
-    for (let i = -s; i < s * 2; i += 8) {
-      g.beginPath();
-      g.moveTo(i, 0);
-      g.lineTo(i + s, s);
-      g.moveTo(i + s, 0);
-      g.lineTo(i, s);
-      g.stroke();
-    }
-  }, true);
-  braidTex.repeat.set(40, 2);
-  const hose = new THREE.Mesh(new THREE.TubeGeometry(hosePath, 48, 0.055, 12), new THREE.MeshStandardMaterial({ map: braidTex, metalness: 0.8, roughness: 0.4 }));
+  const hose = new THREE.Mesh(new THREE.TubeGeometry(hosePath, 48, 0.055, 12), new THREE.MeshStandardMaterial({ color: 0xc3c8cf, metalness: 0.9, roughness: 0.45 }));
   const hoseGroup = new THREE.Group();
   hoseGroup.add(tee, valve, valveKnob, hose);
   hoseGroup.traverse((o) => ((o as THREE.Mesh).castShadow = true));
@@ -341,7 +306,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   // poça: lâmina d'água espelhada que cresce no piso
   const puddle = new THREE.Mesh(
     new THREE.CircleGeometry(1, 64),
-    new THREE.MeshPhysicalMaterial({ color: 0x8fa6b8, roughness: 0.02, metalness: 0.2, clearcoat: 1, transparent: true, opacity: 0.45 }),
+    new THREE.MeshStandardMaterial({ color: 0x8fa6b8, roughness: 0.03, metalness: 0.2, transparent: true, opacity: 0.45 }),
   );
   puddle.rotation.x = -Math.PI / 2;
   puddle.position.set(0.15, FLOOR_Y + 0.002, 0.55);
@@ -354,22 +319,14 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   pipeRig.position.y = PIPE_Y;
   scene.add(pipeRig);
 
-  const brushedRough = canvasTexture(256, brushed);
-  brushedRough.repeat.set(1, 18);
-  const steelPipe = new THREE.MeshPhysicalMaterial({
-    color: 0xa9b0ba,
-    metalness: 1,
-    roughness: 0.42,
-    roughnessMap: brushedRough,
-    anisotropy: 0.3,
-  });
+  const steelPipe = new THREE.MeshStandardMaterial({ color: 0xa9b0ba, metalness: 1, roughness: 0.38 });
   const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 16, 64, 1, true), steelPipe);
   pipe.rotation.z = Math.PI / 2;
   pipe.castShadow = true;
   pipeRig.add(pipe);
 
-  const brass = new THREE.MeshPhysicalMaterial({ color: 0xc9a25a, metalness: 1, roughness: 0.3 });
-  const brassDark = new THREE.MeshPhysicalMaterial({ color: 0x9c7a3c, metalness: 1, roughness: 0.42 });
+  const brass = new THREE.MeshStandardMaterial({ color: 0xc9a25a, metalness: 1, roughness: 0.3 });
+  const brassDark = new THREE.MeshStandardMaterial({ color: 0x9c7a3c, metalness: 1, roughness: 0.42 });
   const union = new THREE.Group();
   pipeRig.add(union);
   const threadGeo = new THREE.TorusGeometry(0.175, 0.01, 8, 48);
@@ -412,8 +369,8 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   }
 
   // ---------- chave ----------
-  const red = new THREE.MeshPhysicalMaterial({ color: 0xb3150c, metalness: 0.2, roughness: 0.38, clearcoat: 1, clearcoatRoughness: 0.12 });
-  const steel = new THREE.MeshPhysicalMaterial({ color: 0xb9c0c9, metalness: 1, roughness: 0.3 });
+  const red = new THREE.MeshStandardMaterial({ color: 0xb3150c, metalness: 0.2, roughness: 0.3 });
+  const steel = new THREE.MeshStandardMaterial({ color: 0xb9c0c9, metalness: 1, roughness: 0.3 });
   const rubber = new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.85 });
   const wrench = buildWrench(red, steel, rubber);
   // a chave fica no plano YZ (perpendicular ao cano) e gira em torno do eixo X
@@ -426,17 +383,15 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
 
   // ---------- água ----------
   const MAX = small ? 320 : 520;
-  const waterMat = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    metalness: 0,
-    roughness: 0.02,
-    transmission: 1,
-    thickness: 0.08,
-    ior: 1.33,
-    attenuationColor: new THREE.Color(0x8fd0ff),
-    attenuationDistance: 0.35,
-    specularIntensity: 1,
-    envMapIntensity: 1.6,
+  // água: translúcida com reflexo do ambiente. Sem refração de propósito: o shader
+  // de refração é caro de compilar e travava a primeira visita.
+  const waterMat = new THREE.MeshStandardMaterial({
+    color: 0xd6efff,
+    metalness: 0.1,
+    roughness: 0.04,
+    transparent: true,
+    opacity: 0.72,
+    envMapIntensity: 1.8,
   });
   const drops = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 12, 10), waterMat, MAX);
   drops.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -532,10 +487,6 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     return -1;
   }
 
-  // ---------- pós-processamento ----------
-  const bokeh = new BokehPass(scene, camera, { focus: 1.8, aperture: small ? 0.006 : 0.008, maxblur: 0.012 });
-  const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.25, 0.4, 1.8);
-  renderer.setEffects([bokeh]);
 
   // ---------- câmera: planos do roteiro ----------
   type Shot = { t: number; pos: THREE.Vector3; look: THREE.Vector3 };
@@ -639,7 +590,6 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     pipeRig.position.y = PIPE_Y - fall * 6;
 
     placeCamera(t, shake);
-    (bokeh.uniforms as { focus: THREE.IUniform<number> }).focus.value = camera.position.distanceTo(tmp.set(0, pipeRig.position.y - 0.15, 0.1));
 
     // gotas
     spawnAcc += dt * 420 * leak * (small ? 0.65 : 1);
@@ -755,14 +705,8 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
       resolveDone();
     }
   }
-  // Qualidade reduzida para GPU fraca: sem desfoque, água sem refração, menos pixels
+  // GPU fraca: menos pixels (nenhum shader novo, então não há nova compilação)
   function lowQuality() {
-    renderer.setEffects([]);
-    waterMat.transmission = 0;
-    waterMat.transparent = true;
-    waterMat.opacity = 0.75;
-    waterMat.color.set(0xcfeeff);
-    waterMat.needsUpdate = true;
     dpr = Math.min(dpr, 1);
     renderer.setPixelRatio(dpr);
     renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -798,14 +742,15 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     // mede alguns quadros completos já com tudo compilado
     let last = await nextFrame();
     let total = 0;
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       renderer.render(scene, camera);
       const now = await nextFrame();
       total += now - last;
       last = now;
     }
     if (disposed) return;
-    if (!fixedStep && total / 4 > 34) {
+    if (fixedStep) (window as unknown as { __introPrograms: number }).__introPrograms = renderer.info.programs?.length ?? -1;
+    if (!fixedStep && total / 3 > 34) {
       lowQuality();
       renderer.render(scene, camera);
       await nextFrame();
@@ -839,8 +784,6 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
       }
     });
     textures.forEach((tx) => tx.dispose());
-    bokeh.dispose();
-    bloom.dispose();
     env.dispose();
     pmrem.dispose();
     renderer.dispose();
