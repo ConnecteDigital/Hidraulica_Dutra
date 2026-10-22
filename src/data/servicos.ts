@@ -58,7 +58,7 @@ export const servicos: Servico[] = [
       },
       {
         q: 'Desentupimento tem garantia?',
-        a: 'Sim, todo serviço da Hidráulica Dutra sai com garantia. O prazo é informado junto com o orçamento.',
+        a: 'Sim, todo serviço da Hidráulica Dutra sai com garantia.',
       },
     ],
   },

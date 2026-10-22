@@ -1,7 +1,7 @@
 // Dados centrais da empresa. Altere aqui e o site inteiro é atualizado.
 
-// TODO: substituir pelo número real (formato: 55 + DDD + número, só dígitos)
-const PHONE_DIGITS = '5511900000000';
+// Formato: 55 + DDD + número, só dígitos
+const PHONE_DIGITS = '5511983232890';
 
 export const site = {
   name: 'Hidráulica Dutra',

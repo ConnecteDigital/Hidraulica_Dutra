@@ -23,15 +23,15 @@ const faq = [
   },
   {
     q: 'Os serviços têm garantia?',
-    a: 'Sim. Todos os serviços da Hidráulica Dutra têm garantia. O prazo é informado junto com o orçamento.',
+    a: 'Sim. Todos os serviços da Hidráulica Dutra têm garantia.',
   },
   {
     q: 'Vocês vendem material hidráulico?',
     a: 'Não. Trabalhamos exclusivamente com mão de obra especializada em serviços hidráulicos, levando as peças necessárias para cada conserto.',
   },
   {
-    q: 'Como peço um orçamento?',
-    a: 'É só chamar no WhatsApp ou ligar. Conte o que está acontecendo, de preferência com uma foto ou vídeo, e já enviamos um encanador.',
+    q: 'Como chamo um encanador?',
+    a: `É só chamar no WhatsApp ou ligar. Conte o que está acontecendo, de preferência com uma foto ou vídeo, e um encanador sai na hora para chegar em até ${site.arrivalMinutes} minutos.`,
   },
 ];
 
@@ -101,7 +101,7 @@ const posts = (await getCollection('blog'))
         </div>
         <div class="step-card">
           <h3>Chegamos em até {site.arrivalMinutes} minutos</h3>
-          <p>Um encanador vai até você, avalia o problema e passa o orçamento antes de começar.</p>
+          <p>Assim que você chama, um encanador já sai para o endereço. Em até {site.arrivalMinutes} minutos ele está aí para conter o problema.</p>
         </div>
         <div class="step-card">
           <h3>Serviço feito com garantia</h3>
@@ -124,7 +124,7 @@ const posts = (await getCollection('blog'))
         </div>
         <div class="feature">
           <Icon name="bolt" size={30} />
-          <div><h3>Chegada rápida</h3><p>Em até {site.arrivalMinutes} minutos um encanador está no local para conter o problema.</p></div>
+          <div><h3>Chegamos em {site.arrivalMinutes} minutos</h3><p>Emergência não pode esperar. Em até {site.arrivalMinutes} minutos um encanador está na sua porta para conter o vazamento e evitar estragos.</p></div>
         </div>
         <div class="feature">
           <Icon name="shield" size={30} />
@@ -132,7 +132,7 @@ const posts = (await getCollection('blog'))
         </div>
         <div class="feature">
           <Icon name="check" size={30} />
-          <div><h3>Orçamento antes de começar</h3><p>Você sabe o valor antes de qualquer serviço. Sem surpresa na hora de pagar.</p></div>
+          <div><h3>Resolvido na primeira visita</h3><p>Chegamos equipados com ferramentas e peças para resolver o problema já no primeiro atendimento.</p></div>
         </div>
       </div>
     </div>
