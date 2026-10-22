@@ -1,0 +1,55 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import CtaButtons from '../components/CtaButtons.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+import { bairrosPorZona, bairroPath, zonasPrioritarias } from '../data/bairros';
+import { breadcrumbSchema } from '../data/schema';
+
+const crumbs = [
+  { name: 'Início', path: '/' },
+  { name: 'Áreas atendidas', path: '/areas-atendidas/' },
+];
+---
+
+<Base
+  title="Áreas Atendidas: Encanador 24h em São Paulo | Hidráulica Dutra"
+  description={`Encanador 24 horas na Zona Norte, Zona Oeste, Centro, Zona Sul e Zona Leste de São Paulo. Chegamos em até ${site.arrivalMinutes} minutos.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <section class="hero page-hero">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+      <span class="eyebrow">Áreas atendidas</span>
+      <h1>Encanador em toda São Paulo</h1>
+      <p class="hero-lead">Atendemos 24 horas, com foco na Zona Norte e na Zona Oeste. Encontre o seu bairro.</p>
+      <CtaButtons />
+    </div>
+  </section>
+  <section class="section section-soft">
+    <div class="container zones">
+      {
+        bairrosPorZona().map((g) => (
+          <div class:list={['zone', { 'is-priority': zonasPrioritarias.includes(g.zona) }]}>
+            <h2 style="font-size:1.6rem">
+              {g.zona}
+              {zonasPrioritarias.includes(g.zona) && <span class="tag">Foco</span>}
+            </h2>
+            <ul>
+              {g.bairros.map((b) => (
+                <li>
+                  <a href={bairroPath(b)}>
+                    <Icon name="pin" size={16} /> Encanador em {b.nome}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+  <CtaBand />
+</Base>

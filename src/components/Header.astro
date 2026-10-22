@@ -1,0 +1,41 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo.png';
+import Icon from './Icon.astro';
+import { site, whatsappUrl } from '../data/site';
+
+const links = [
+  { href: '/servicos/', label: 'Serviços' },
+  { href: '/areas-atendidas/', label: 'Áreas atendidas' },
+  { href: '/blog/', label: 'Blog' },
+];
+---
+
+<header class="site-header">
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <span><span class="pulse" aria-hidden="true"></span> Plantão 24 horas · chegamos em até {site.arrivalMinutes} minutos</span>
+      <a href={site.tel} class="topbar-phone"><Icon name="phone" size={16} /> {site.phoneDisplay}</a>
+    </div>
+  </div>
+  <div class="container header-inner">
+    <a href="/" class="brand" aria-label={`${site.name}, página inicial`}>
+      <Image src={logo} alt={site.name} width={248} loading="eager" />
+    </a>
+    <nav class="nav-desktop" aria-label="Principal">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+    <div class="header-cta">
+      <a class="btn btn-wa btn-sm" href={whatsappUrl()} target="_blank" rel="noopener">
+        <Icon name="whatsapp" size={18} /> <span>WhatsApp</span>
+      </a>
+      <details class="nav-mobile">
+        <summary aria-label="Abrir menu"><span></span><span></span><span></span></summary>
+        <nav aria-label="Menu">
+          {links.map((l) => <a href={l.href}>{l.label}</a>)}
+          <a href={site.tel}><Icon name="phone" size={18} /> Ligar: {site.phoneDisplay}</a>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>

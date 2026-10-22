@@ -1,0 +1,104 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import CtaButtons from '../../components/CtaButtons.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import FaqList from '../../components/FaqList.astro';
+import Icon from '../../components/Icon.astro';
+import { site } from '../../data/site';
+import { servicos, type Servico } from '../../data/servicos';
+import { bairros, bairroPath } from '../../data/bairros';
+import { breadcrumbSchema, faqSchema, serviceSchema } from '../../data/schema';
+
+export function getStaticPaths() {
+  return servicos.map((servico) => ({ params: { slug: servico.slug }, props: { servico } }));
+}
+
+interface Props {
+  servico: Servico;
+}
+
+const { servico } = Astro.props;
+const crumbs = [
+  { name: 'Início', path: '/' },
+  { name: 'Serviços', path: '/servicos/' },
+  { name: servico.nome, path: `/servicos/${servico.slug}/` },
+];
+const faq = [
+  ...servico.faq,
+  {
+    q: `Quanto tempo demora para chegar um encanador para ${servico.nome.toLowerCase()}?`,
+    a: `Atendemos 24 horas e chegamos em até ${site.arrivalMinutes} minutos nas regiões atendidas de São Paulo.`,
+  },
+];
+const outros = servicos.filter((s) => s.slug !== servico.slug).slice(0, 8);
+const msg = `Olá! Vim pelo site e preciso de ${servico.nome.toLowerCase()}.`;
+---
+
+<Base
+  title={`${servico.keyword} 24h | Hidráulica Dutra`}
+  description={servico.metaDescription}
+  schema={[serviceSchema(servico), faqSchema(faq), breadcrumbSchema(crumbs)]}
+>
+  <section class="hero page-hero">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+      <span class="eyebrow">Serviço 24 horas em São Paulo</span>
+      <h1>{servico.keyword}</h1>
+      <p class="hero-lead">{servico.resumo} Atendimento 24h, chegada em até {site.arrivalMinutes} minutos e garantia no serviço.</p>
+      <CtaButtons message={msg} />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container content-grid">
+      <article class="prose">
+        {servico.intro.map((p) => <p>{p}</p>)}
+
+        <h2>Quando chamar um encanador</h2>
+        <ul>{servico.sinais.map((s) => <li>{s}</li>)}</ul>
+
+        <h2>Como fazemos o serviço</h2>
+        <ol>{servico.comoFazemos.map((s) => <li>{s}</li>)}</ol>
+
+        <h2>Por que chamar a Hidráulica Dutra</h2>
+        <ul>
+          <li>Atendimento 24 horas, inclusive fins de semana e feriados</li>
+          <li>Chegada em até {site.arrivalMinutes} minutos</li>
+          <li>Garantia em todos os serviços</li>
+          <li>Encanadores experientes e equipados</li>
+        </ul>
+
+        <h2>Perguntas frequentes</h2>
+        <FaqList items={faq} />
+
+        <h2>{servico.nome} por bairro</h2>
+        <p>
+          Atendemos {servico.nome.toLowerCase()} em toda a cidade de São Paulo, incluindo:
+          {bairros.map((b, i) => (
+            <>
+              <a href={bairroPath(b)}>{b.nome}</a>{i < bairros.length - 1 ? ', ' : '.'}
+            </>
+          ))}
+        </p>
+      </article>
+
+      <aside class="sidebar">
+        <div class="side-card">
+          <h2>Atendimento imediato</h2>
+          <p>Fale agora com um encanador e receba atendimento em até {site.arrivalMinutes} minutos.</p>
+          <CtaButtons message={msg} size="md" />
+        </div>
+        <div class="side-list">
+          <h2>Outros serviços</h2>
+          <ul>
+            {outros.map((s) => <li><a href={`/servicos/${s.slug}/`}>{s.nome}</a></li>)}
+            <li><a href="/servicos/"><strong>Ver todos <Icon name="arrow" size={14} /></strong></a></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <CtaBand message={msg} />
+</Base>

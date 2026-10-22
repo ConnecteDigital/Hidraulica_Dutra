@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { getCollection } from 'astro:content';
+import { breadcrumbSchema } from '../../data/schema';
+
+const posts = (await getCollection('blog')).sort((a, b) => b.data.data.getTime() - a.data.data.getTime());
+const crumbs = [
+  { name: 'Início', path: '/' },
+  { name: 'Blog', path: '/blog/' },
+];
+---
+
+<Base
+  title="Blog de Hidráulica: Dicas de Encanador | Hidráulica Dutra"
+  description="Dicas práticas sobre vazamentos, entupimentos, registros e manutenção hidráulica para sua casa ou apartamento em São Paulo."
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <section class="hero page-hero">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+      <span class="eyebrow">Blog</span>
+      <h1>Dicas de hidráulica</h1>
+      <p class="hero-lead">O que fazer em emergências, como evitar problemas e quando chamar um encanador.</p>
+    </div>
+  </section>
+  <section class="section section-soft">
+    <div class="container posts">
+      {
+        posts.map((p) => (
+          <a class="post-card" href={`/blog/${p.id}/`}>
+            <time datetime={p.data.data.toISOString()}>{p.data.data.toLocaleDateString('pt-BR')}</time>
+            <h2>{p.data.titulo}</h2>
+            <p>{p.data.descricao}</p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+  <CtaBand />
+</Base>

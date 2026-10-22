@@ -1,0 +1,121 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import CtaButtons from '../components/CtaButtons.astro';
+import CtaBand from '../components/CtaBand.astro';
+import FaqList from '../components/FaqList.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import { site } from '../data/site';
+import { servicos } from '../data/servicos';
+import { bairros, bairroPath, type Bairro } from '../data/bairros';
+import { breadcrumbSchema, faqSchema } from '../data/schema';
+
+export function getStaticPaths() {
+  return bairros.map((bairro) => ({ params: { slug: bairro.slug }, props: { bairro } }));
+}
+
+interface Props {
+  bairro: Bairro;
+}
+
+const { bairro } = Astro.props;
+const path = bairroPath(bairro);
+const crumbs = [
+  { name: 'Início', path: '/' },
+  { name: 'Áreas atendidas', path: '/areas-atendidas/' },
+  { name: `Encanador em ${bairro.nome}`, path },
+];
+const faq = [
+  {
+    q: `Vocês atendem em ${bairro.nome} 24 horas?`,
+    a: `Sim. Atendemos ${bairro.nome} e bairros vizinhos 24 horas por dia, inclusive fins de semana e feriados.`,
+  },
+  {
+    q: `Em quanto tempo o encanador chega em ${bairro.nome}?`,
+    a: `Chegamos em até ${site.arrivalMinutes} minutos em ${bairro.nome}.`,
+  },
+  {
+    q: `Atendem também ${bairro.vizinhos.slice(0, 2).join(' e ')}?`,
+    a: `Sim. Além de ${bairro.nome}, atendemos ${bairro.vizinhos.join(', ')} e toda a ${bairro.zona === 'Centro' ? 'região central' : bairro.zona} de São Paulo.`,
+  },
+  {
+    q: 'O serviço tem garantia?',
+    a: 'Sim. Todos os serviços da Hidráulica Dutra têm garantia, informada junto com o orçamento.',
+  },
+];
+const outrosBairros = bairros.filter((b) => b.slug !== bairro.slug);
+const msg = `Olá! Vim pelo site e preciso de um encanador em ${bairro.nome}.`;
+---
+
+<Base
+  title={`Encanador em ${bairro.nome} 24h | Chegamos em ${site.arrivalMinutes} min | Hidráulica Dutra`}
+  description={`Encanador em ${bairro.nome}, ${bairro.zona} de São Paulo. Vazamentos, desentupimento, conserto de cano e registro 24 horas. Chegamos em até ${site.arrivalMinutes} minutos, com garantia.`}
+  schema={[faqSchema(faq), breadcrumbSchema(crumbs)]}
+>
+  <section class="hero page-hero">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+      <span class="eyebrow">{bairro.zona} · São Paulo</span>
+      <h1>Encanador em {bairro.nome} 24 horas</h1>
+      <p class="hero-lead">
+        Precisa de encanador em {bairro.nome}? A Hidráulica Dutra atende 24 horas e chega em até {site.arrivalMinutes} minutos
+        para resolver vazamentos, entupimentos e consertos hidráulicos com garantia.
+      </p>
+      <CtaButtons message={msg} />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container content-grid">
+      <article class="prose">
+        <h2>Encanador 24h em {bairro.nome}</h2>
+        <p>{bairro.sobre}</p>
+        <p>
+          Nossa equipe circula pela {bairro.zona === 'Centro' ? 'região central' : bairro.zona} e consegue chegar rápido
+          em {bairro.nome} e nos bairros vizinhos, como {bairro.vizinhos.join(', ')}. Assim que você chama, um encanador já sai
+          para o endereço.
+        </p>
+
+        <h2>O que fazemos em {bairro.nome}</h2>
+        <ul>
+          <li>Conserto de vazamento e de cano furado (PVC, PPR, cobre e CPVC)</li>
+          <li>Desentupimento de pia, ralo, vaso sanitário e esgoto</li>
+          <li>Troca de registro geral e de registro de chuveiro</li>
+          <li>Conserto de caixa acoplada e válvula de descarga Hydra</li>
+          <li>Instalação de caixa d’água, filtro e bomba pressurizadora</li>
+        </ul>
+
+        <h2>Perguntas frequentes</h2>
+        <FaqList items={faq} />
+      </article>
+
+      <aside class="sidebar">
+        <div class="side-card">
+          <h2>Encanador em {bairro.nome} agora</h2>
+          <p>Fale com a gente e receba atendimento em até {site.arrivalMinutes} minutos.</p>
+          <CtaButtons message={msg} size="md" />
+        </div>
+        <div class="side-list">
+          <h2>Outros bairros</h2>
+          <ul>
+            {outrosBairros.map((b) => <li><a href={bairroPath(b)}>Encanador em {b.nome}</a></li>)}
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section-soft">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Serviços em {bairro.nome}</span>
+        <h2>Serviços de encanador em {bairro.nome}</h2>
+      </div>
+      <div class="services-grid">
+        {servicos.map((s) => <ServiceCard servico={s} />)}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title={`Encanador em ${bairro.nome} agora`} message={msg} />
+</Base>
