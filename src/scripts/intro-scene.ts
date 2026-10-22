@@ -3,6 +3,7 @@
 // vazamento para e o cano desce, revelando o site por trás da cena.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
 
 export type IntroStage = 'leak' | 'fix' | 'ok';
 
@@ -169,8 +170,15 @@ function buildWrench(red: THREE.Material, steel: THREE.Material, dark: THREE.Mat
   return group;
 }
 
-export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): IntroHandle {
-  const small = Math.min(window.innerWidth, window.innerHeight) < 700;
+export interface IntroOptions {
+  // Gravação offline do vídeo da abertura: passo fixo de 1/fps por quadro, qualidade
+  // máxima (desfoque de lente e água com refração) e controle externo de cada quadro.
+  record?: { fps: number };
+}
+
+export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks, opts: IntroOptions = {}): IntroHandle {
+  const record = opts.record;
+  const small = !record && Math.min(window.innerWidth, window.innerHeight) < 700;
   // ?introSpeed=0.25 deixa a abertura em câmera lenta (útil para revisar)
   const params = new URLSearchParams(location.search);
   const speed = Number(params.get('introSpeed')) || 1;
@@ -180,8 +188,10 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
+    preserveDrawingBuffer: !!record,
+    outputBufferType: record ? THREE.HalfFloatType : THREE.UnsignedByteType,
   });
-  let dpr = Math.min(window.devicePixelRatio, 1.5);
+  let dpr = record ? 1 : Math.min(window.devicePixelRatio, 1.5);
   seed = 7;
   renderer.setPixelRatio(dpr);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -205,7 +215,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   const key = new THREE.SpotLight(0xffe6c8, 55, 18, 0.6, 0.7, 1.6);
   key.position.set(2.5, 4.2, 3.2);
   key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
+  key.shadow.mapSize.set(record ? 2048 : 1024, record ? 2048 : 1024);
   key.shadow.bias = -0.0004;
   key.shadow.normalBias = 0.02;
   scene.add(key, key.target);
@@ -395,14 +405,27 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
   const MAX = small ? 320 : 520;
   // água: translúcida com reflexo do ambiente. Sem refração de propósito: o shader
   // de refração é caro de compilar e travava a primeira visita.
-  const waterMat = new THREE.MeshStandardMaterial({
-    color: 0xd6efff,
-    metalness: 0.1,
-    roughness: 0.04,
-    transparent: true,
-    opacity: 0.72,
-    envMapIntensity: 1.8,
-  });
+  const waterMat: THREE.Material = record
+    ? new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        metalness: 0,
+        roughness: 0.02,
+        transmission: 1,
+        thickness: 0.08,
+        ior: 1.33,
+        attenuationColor: new THREE.Color(0x8fd0ff),
+        attenuationDistance: 0.35,
+        specularIntensity: 1,
+        envMapIntensity: 1.6,
+      })
+    : new THREE.MeshStandardMaterial({
+        color: 0xd6efff,
+        metalness: 0.1,
+        roughness: 0.04,
+        transparent: true,
+        opacity: 0.72,
+        envMapIntensity: 1.8,
+      });
   const drops = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 12, 10), waterMat, MAX);
   drops.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   drops.frustumCulled = false;
@@ -564,13 +587,22 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     }
   }
 
+  // desfoque de lente: só na gravação (caro demais para rodar no aparelho do visitante)
+  const bokeh = record ? new BokehPass(scene, camera, { focus: 1.8, aperture: 0.008, maxblur: 0.012 }) : null;
+  if (bokeh) renderer.setEffects([bokeh]);
+
   function frame() {
-    timer.update();
-    // os primeiros quadros incluem a compilação dos shaders; não contam no roteiro
-    const raw = frames < 2 ? 0 : timer.getDelta();
-    frames++;
-    // passo máximo de 1/20 s: se o aparelho engasgar, a animação espera em vez de pular
-    const realDt = fixedStep ? (frames > 2 ? fixedStep : 0) : Math.min(raw, 1 / 20) * speed;
+    let realDt: number;
+    if (record) {
+      realDt = frames++ === 0 ? 0 : 1 / record.fps;
+    } else {
+      timer.update();
+      // os primeiros quadros incluem a compilação dos shaders; não contam no roteiro
+      const raw = frames < 2 ? 0 : timer.getDelta();
+      frames++;
+      // passo máximo de 1/20 s: se o aparelho engasgar, a animação espera em vez de pular
+      realDt = fixedStep ? (frames > 2 ? fixedStep : 0) : Math.min(raw, 1 / 20) * speed;
+    }
     const dt = Math.min(realDt, 1 / 30);
     elapsed += realDt;
     const t = elapsed;
@@ -705,6 +737,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     puddle.visible = wet > 0;
     floorMat.roughness = 0.4 - wet * 0.3;
 
+    if (bokeh) (bokeh.uniforms as { focus: THREE.IUniform<number> }).focus.value = camera.position.distanceTo(tmp.set(0, pipeRig.position.y - 0.15, 0.1));
     renderer.render(scene, camera);
 
     // linha de revelação: topo do cano projetado na tela
@@ -763,7 +796,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     }
     if (disposed) return;
     if (fixedStep) (window as unknown as { __introPrograms: number }).__introPrograms = renderer.info.programs?.length ?? -1;
-    if (!fixedStep && total / 3 > 34) {
+    if (!fixedStep && !record && total / 3 > 34) {
       lowQuality();
       renderer.render(scene, camera);
       await nextFrame();
@@ -772,6 +805,19 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     puddle.visible = false;
     wrenchPivot.visible = false;
     if (disposed) return;
+    if (record) {
+      // quem grava chama step() a cada quadro e captura o canvas
+      canvas.style.opacity = '1';
+      (window as unknown as { __introRecord: unknown }).__introRecord = {
+        step: () => {
+          frame();
+          return { t: elapsed, done: elapsed >= T.end };
+        },
+        end: T.end,
+      };
+      cb.onReady();
+      return;
+    }
     canvas.style.transition = 'opacity .25s ease';
     canvas.style.opacity = '1';
     timer.reset();
@@ -797,6 +843,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
       }
     });
     textures.forEach((tx) => tx.dispose());
+    bokeh?.dispose();
     env.dispose();
     pmrem.dispose();
     renderer.dispose();
