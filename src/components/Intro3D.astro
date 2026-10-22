@@ -8,7 +8,7 @@ import { site } from '../data/site';
   <!-- capa: o primeiro quadro da cena, já renderizado, aparece na hora enquanto o 3D prepara -->
   <picture class="intro-poster">
     <source media="(max-aspect-ratio: 9/10)" srcset="/intro/poster-m.webp" />
-    <img src="/intro/poster-d.webp" alt="" decoding="async" fetchpriority="high" />
+    <img src="/intro/poster-d.webp" alt="" decoding="async" fetchpriority="high" onerror="this.remove()" />
   </picture>
   <canvas class="intro-canvas"></canvas>
   <div class="intro-caption">

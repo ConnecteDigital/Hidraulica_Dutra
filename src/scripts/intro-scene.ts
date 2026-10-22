@@ -575,6 +575,8 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks): Intro
     elapsed += realDt;
     const t = elapsed;
     (window as unknown as { __introT: number }).__introT = t;
+    // ?introFreeze congela no primeiro quadro (usado para gerar a imagem de capa)
+    if (params.has('introFreeze') && t > 0) renderer.setAnimationLoop(null);
 
     // vazamento: abre forte e fecha conforme a porca é apertada
     const tighten = phase(t, T.grip, T.fixed);
