@@ -236,9 +236,9 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks, opts: 
   // parede de azulejo branco (cada peça ~1,2 unidade)
   const wallMap = canvasTexture(512, (g, s) => tiles(g, s, 4, [196, 202, 208], '#80868d', 7), true);
   const wallBump = canvasTexture(512, (g, s) => tiles(g, s, 4, [0, 0, 0], '', 7, true));
-  for (const tx of [wallMap, wallBump]) tx.repeat.set(14 / 4.8, 8 / 4.8);
+  for (const tx of [wallMap, wallBump]) tx.repeat.set(40 / 4.8, 8 / 4.8);
   const wall = new THREE.Mesh(
-    new THREE.PlaneGeometry(14, 8),
+    new THREE.PlaneGeometry(40, 8),
     new THREE.MeshStandardMaterial({ map: wallMap, bumpMap: wallBump, bumpScale: 1.2, roughness: 0.18 }),
   );
   wall.position.set(0, 1.4, WALL_Z);
@@ -248,21 +248,21 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks, opts: 
   // piso de porcelanato (peças grandes), que fica brilhante quando molha
   const floorMap = canvasTexture(512, (g, s) => tiles(g, s, 2, [118, 114, 108], '#4f4b47', 5), true);
   const floorBump = canvasTexture(512, (g, s) => tiles(g, s, 2, [0, 0, 0], '', 5, true));
-  for (const tx of [floorMap, floorBump]) tx.repeat.set(14 / 6, 10 / 6);
+  for (const tx of [floorMap, floorBump]) tx.repeat.set(40 / 6, 20 / 6);
   const floorMat = new THREE.MeshStandardMaterial({
     map: floorMap,
     bumpMap: floorBump,
     bumpScale: 0.8,
     roughness: 0.4,
   });
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 10), floorMat);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = FLOOR_Y;
   floor.receiveShadow = true;
   scene.add(floor);
 
   // rodapé de azulejo
-  const skirting = new THREE.Mesh(new THREE.BoxGeometry(14, 0.18, 0.05), new THREE.MeshStandardMaterial({ color: 0xdfe3e8, roughness: 0.25 }));
+  const skirting = new THREE.Mesh(new THREE.BoxGeometry(40, 0.18, 0.05), new THREE.MeshStandardMaterial({ color: 0xdfe3e8, roughness: 0.25 }));
   skirting.position.set(0, FLOOR_Y + 0.09, WALL_Z + 0.025);
   skirting.receiveShadow = true;
   scene.add(skirting);
@@ -340,7 +340,7 @@ export function startIntro(canvas: HTMLCanvasElement, cb: IntroCallbacks, opts: 
   scene.add(pipeRig);
 
   const steelPipe = new THREE.MeshStandardMaterial({ color: 0xa9b0ba, metalness: 1, roughness: 0.38 });
-  const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 16, 64, 1, true), steelPipe);
+  const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 40, 64, 1, true), steelPipe);
   pipe.rotation.z = Math.PI / 2;
   pipe.castShadow = true;
   pipeRig.add(pipe);
