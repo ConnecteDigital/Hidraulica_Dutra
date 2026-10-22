@@ -6,6 +6,9 @@ import CtaBand from '../components/CtaBand.astro';
 import ServiceCard from '../components/ServiceCard.astro';
 import FaqList from '../components/FaqList.astro';
 import Icon from '../components/Icon.astro';
+import Gallery from '../components/Gallery.astro';
+import { Image } from 'astro:assets';
+import { fotoDoServico } from '../data/fotos';
 import { site } from '../data/site';
 import { servicos } from '../data/servicos';
 import { bairrosPorZona, bairroPath, zonasPrioritarias } from '../data/bairros';
@@ -34,6 +37,8 @@ const faq = [
     a: `É só chamar no WhatsApp ou ligar. Conte o que está acontecendo, de preferência com uma foto ou vídeo, e um encanador sai na hora para chegar em até ${site.arrivalMinutes} minutos.`,
   },
 ];
+
+const fotoEquipe = fotoDoServico('desentupimento');
 
 const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.data.getTime() - a.data.data.getTime())
@@ -112,10 +117,19 @@ const posts = (await getCollection('blog'))
   </section>
 
   <section class="section">
-    <div class="container">
+    <div class="container about-grid">
+      {
+        fotoEquipe && (
+          <div class="about-photo">
+            <Image src={fotoEquipe.src} alt={fotoEquipe.alt} widths={[400, 600, 800]} sizes="(max-width: 900px) 100vw, 460px" />
+          </div>
+        )
+      }
+      <div>
       <div class="section-head">
         <span class="eyebrow">Por que a Hidráulica Dutra</span>
         <h2>Encanador de confiança, a qualquer hora</h2>
+        <p>Equipe própria, uniformizada e equipada para resolver desde um furo no cano até o desentupimento de uma coluna de esgoto.</p>
       </div>
       <div class="features">
         <div class="feature">
@@ -135,10 +149,22 @@ const posts = (await getCollection('blog'))
           <div><h3>Resolvido na primeira visita</h3><p>Chegamos equipados com ferramentas e peças para resolver o problema já no primeiro atendimento.</p></div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
   <CtaBand />
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Trabalhos realizados</span>
+        <h2>Serviços que já fizemos</h2>
+        <p>Fotos reais de atendimentos da Hidráulica Dutra em São Paulo.</p>
+      </div>
+      <Gallery limit={8} exclude="desentupimento" />
+    </div>
+  </section>
 
   <section class="section section-soft" id="areas">
     <div class="container">

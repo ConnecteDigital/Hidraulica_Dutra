@@ -305,3 +305,34 @@ p { margin: 0 0 1em; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition: none !important; scroll-behavior: auto !important; }
 }
 :focus-visible { outline: 3px solid var(--cyan-300); outline-offset: 2px; }
+
+/* fotos */
+.service-card.has-photo { padding-top: 0; overflow: hidden; }
+.service-photo { display: block; margin: 0 -24px 0; aspect-ratio: 4 / 3; overflow: hidden; background: var(--bg-soft); }
+.service-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+.service-card:hover .service-photo img { transform: scale(1.05); }
+.service-card.has-photo .service-icon { margin-top: -26px; position: relative; box-shadow: 0 0 0 4px #fff; }
+
+.gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.gallery-item { position: relative; display: block; border-radius: 14px; overflow: hidden; aspect-ratio: 3 / 4; color: #fff; text-decoration: none; }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+.gallery-item:hover img { transform: scale(1.06); }
+.gallery-item span {
+  position: absolute; inset: auto 0 0 0; padding: 40px 14px 12px;
+  background: linear-gradient(transparent, rgba(5, 13, 31, .9));
+  font: 700 1.1rem/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .03em;
+}
+@media (max-width: 800px) { .gallery { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+
+.service-figure { margin: 28px 0; }
+.service-figure img { width: 100%; max-height: 560px; object-fit: cover; border-radius: var(--radius); }
+.service-figure figcaption { font-size: .9rem; color: var(--ink-soft); margin-top: 8px; }
+
+.about-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 48px; align-items: center; }
+.about-photo { border-radius: 24px; overflow: hidden; aspect-ratio: 4 / 5; box-shadow: var(--shadow); }
+.about-photo img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; } .about-photo { aspect-ratio: 4 / 3; } }
+.service-photo-empty {
+  display: grid; place-items: center; color: rgba(95, 208, 255, .55);
+  background: radial-gradient(80% 90% at 50% 30%, #12306e, var(--navy-900));
+}

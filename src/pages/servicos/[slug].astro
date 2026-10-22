@@ -5,6 +5,9 @@ import CtaButtons from '../../components/CtaButtons.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import FaqList from '../../components/FaqList.astro';
 import Icon from '../../components/Icon.astro';
+import Gallery from '../../components/Gallery.astro';
+import { Image } from 'astro:assets';
+import { fotoDoServico } from '../../data/fotos';
 import { site } from '../../data/site';
 import { servicos, type Servico } from '../../data/servicos';
 import { bairros, bairroPath } from '../../data/bairros';
@@ -31,6 +34,7 @@ const faq = [
     a: `Atendemos 24 horas e chegamos em até ${site.arrivalMinutes} minutos nas regiões atendidas de São Paulo.`,
   },
 ];
+const foto = fotoDoServico(servico.slug);
 const outros = servicos.filter((s) => s.slug !== servico.slug).slice(0, 8);
 const msg = `Olá! Vim pelo site e preciso de ${servico.nome.toLowerCase()}.`;
 ---
@@ -54,6 +58,15 @@ const msg = `Olá! Vim pelo site e preciso de ${servico.nome.toLowerCase()}.`;
     <div class="container content-grid">
       <article class="prose">
         {servico.intro.map((p) => <p>{p}</p>)}
+
+        {
+          foto && (
+            <figure class="service-figure">
+              <Image src={foto.src} alt={foto.alt} widths={[480, 800, 1100]} sizes="(max-width: 960px) 100vw, 760px" />
+              <figcaption>{servico.nome}: serviço realizado pela Hidráulica Dutra em São Paulo.</figcaption>
+            </figure>
+          )
+        }
 
         <h2>Quando chamar um encanador</h2>
         <ul>{servico.sinais.map((s) => <li>{s}</li>)}</ul>
@@ -97,6 +110,16 @@ const msg = `Olá! Vim pelo site e preciso de ${servico.nome.toLowerCase()}.`;
           </ul>
         </div>
       </aside>
+    </div>
+  </section>
+
+  <section class="section section-soft">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Trabalhos realizados</span>
+        <h2>Outros serviços que fizemos</h2>
+      </div>
+      <Gallery limit={8} exclude={servico.slug} />
     </div>
   </section>
 
