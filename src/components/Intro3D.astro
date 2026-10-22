@@ -1,0 +1,103 @@
+---
+// Abertura 3D da home. Só aparece quando o script do <head> marca a página
+// com .intro-on (primeira visita da sessão, sem "reduzir movimento").
+import { site } from '../data/site';
+---
+
+<div class="intro" id="intro" aria-hidden="true">
+  <canvas class="intro-canvas"></canvas>
+  <div class="intro-caption">
+    <p class="cap cap-leak">Vazamento?</p>
+    <p class="cap cap-fix">A gente resolve.</p>
+    <p class="cap cap-ok">Chegamos em até <strong>{site.arrivalMinutes} minutos</strong></p>
+  </div>
+  <button class="intro-skip" type="button">Pular</button>
+</div>
+
+<style is:global>
+  .intro { display: none; }
+  html.intro-on .intro {
+    display: block; position: fixed; inset: 0; z-index: 200; background: #061127;
+    transition: transform 1.2s cubic-bezier(.65, 0, .35, 1), opacity 1.2s ease;
+  }
+  html.intro-on body { overflow: hidden; }
+  .intro-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .intro.is-leaving { transform: translateY(100%); }
+  .intro-caption {
+    position: absolute; left: 0; right: 0; bottom: 14vh; text-align: center; pointer-events: none;
+    font-family: var(--font-display); text-transform: uppercase; color: #fff; padding: 0 20px;
+  }
+  .cap {
+    position: absolute; left: 0; right: 0; margin: 0; opacity: 0; transform: translateY(12px);
+    transition: opacity .45s ease, transform .45s ease;
+    font-size: clamp(2rem, 8vw, 3.6rem); font-weight: 800; letter-spacing: .02em;
+    text-shadow: 0 6px 30px rgba(0, 0, 0, .6);
+  }
+  .cap strong { color: #5fd0ff; }
+  .intro[data-stage='leak'] .cap-leak,
+  .intro[data-stage='fix'] .cap-fix,
+  .intro[data-stage='ok'] .cap-ok { opacity: 1; transform: none; }
+  .intro-skip {
+    position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px;
+    background: rgba(255, 255, 255, .1); color: #fff; border: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 999px; padding: 8px 16px; font: 600 .9rem/1 var(--font-body); cursor: pointer;
+  }
+  .intro-skip:hover { background: rgba(255, 255, 255, .2); }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const intro = document.getElementById('intro');
+
+  function finish() {
+    root.classList.remove('intro-on');
+    intro?.remove();
+  }
+
+  if (intro && root.classList.contains('intro-on')) {
+    try {
+      sessionStorage.setItem('introVista', '1');
+    } catch {}
+
+    const canvas = intro.querySelector('canvas')!;
+    const skipBtn = intro.querySelector<HTMLButtonElement>('.intro-skip')!;
+    let leaving = false;
+
+    // Se o 3D demorar para carregar (rede lenta), mostra o site direto
+    const fallback = window.setTimeout(() => leave(), 3500);
+
+    function leave(handle?: { dispose: () => void }) {
+      if (leaving) return;
+      leaving = true;
+      window.clearTimeout(fallback);
+      intro!.classList.add('is-leaving');
+      intro!.addEventListener(
+        'transitionend',
+        () => {
+          handle?.dispose();
+          finish();
+        },
+        { once: true },
+      );
+      // garantia caso o transitionend não dispare
+      window.setTimeout(() => {
+        handle?.dispose();
+        finish();
+      }, 1600);
+    }
+
+    skipBtn.addEventListener('click', () => leave());
+
+    import('../scripts/intro-scene')
+      .then(({ startIntro }) => {
+        if (leaving) return;
+        window.clearTimeout(fallback);
+        const handle = startIntro(canvas, (stage) => (intro.dataset.stage = stage));
+        skipBtn.onclick = () => {
+          handle.skip();
+        };
+        handle.done.then(() => leave(handle));
+      })
+      .catch(() => leave());
+  }
+</script>

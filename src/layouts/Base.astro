@@ -49,6 +49,7 @@ const jsonLd = [localBusinessSchema(), ...schema];
     <meta name="twitter:card" content="summary_large_image" />
 
     {jsonLd.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+    <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>

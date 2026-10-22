@@ -7,6 +7,7 @@ import ServiceCard from '../components/ServiceCard.astro';
 import FaqList from '../components/FaqList.astro';
 import Icon from '../components/Icon.astro';
 import Gallery from '../components/Gallery.astro';
+import Intro3D from '../components/Intro3D.astro';
 import { Image } from 'astro:assets';
 import { fotoDoServico } from '../data/fotos';
 import { site } from '../data/site';
@@ -50,6 +51,19 @@ const posts = (await getCollection('blog'))
   description={site.description}
   schema={[faqSchema(faq)]}
 >
+  <script slot="head" is:inline>
+    // Decide antes da primeira pintura se a abertura 3D vai rodar
+    (function () {
+      try {
+        if (sessionStorage.getItem('introVista')) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var c = document.createElement('canvas');
+        if (!(c.getContext('webgl2') || c.getContext('webgl'))) return;
+        document.documentElement.classList.add('intro-on');
+      } catch (e) {}
+    })();
+  </script>
+  <Intro3D />
   <section class="hero">
     <div class="container hero-grid">
       <div>
