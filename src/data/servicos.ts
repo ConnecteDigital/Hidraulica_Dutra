@@ -527,36 +527,6 @@ export const servicos: Servico[] = [
     ],
   },
   {
-    slug: 'impermeabilizacao',
-    nome: 'Impermeabilização',
-    keyword: 'Impermeabilização de caixa d’água e áreas molhadas',
-    resumo: 'Impermeabilização de caixas d’água, lajes e áreas molhadas contra infiltração.',
-    metaDescription:
-      'Impermeabilização de caixa d’água, laje e áreas molhadas em São Paulo. Pare a infiltração de vez. Serviço com garantia.',
-    icon: 'shield',
-    intro: [
-      'Infiltrações que voltam sempre, mesmo depois de pintar, normalmente indicam falta ou falha de impermeabilização. A água encontra caminho e estraga reboco, pintura e móveis.',
-      'Fazemos impermeabilização de caixas d’água de alvenaria, lajes e áreas molhadas, com preparo da superfície e produtos adequados para cada caso.',
-    ],
-    sinais: [
-      'Infiltração que volta depois de pintar',
-      'Bolhas e descascamento na pintura',
-      'Caixa d’água de alvenaria perdendo água',
-    ],
-    comoFazemos: [
-      'Avaliamos a origem da infiltração',
-      'Preparamos e tratamos a superfície',
-      'Aplicamos o sistema de impermeabilização adequado',
-      'Respeitamos a cura e testamos',
-    ],
-    faq: [
-      {
-        q: 'Impermeabilização resolve qualquer infiltração?',
-        a: 'Não. Se a infiltração vem de um cano vazando, primeiro é preciso consertar o vazamento. Avaliamos para atacar a causa certa.',
-      },
-    ],
-  },
-  {
     slug: 'instalacao-de-filtro',
     nome: 'Instalação de Filtro',
     keyword: 'Instalação de filtro de água',

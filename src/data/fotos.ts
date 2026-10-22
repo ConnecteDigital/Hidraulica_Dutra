@@ -19,7 +19,6 @@ const alts: Record<string, string> = {
   'troca-de-reparo-de-torneira': 'Torneira de lavatório com reparos novos instalados',
   'instalacao-de-caixa-dagua': 'Caixas d’água instaladas na laje de um imóvel em São Paulo',
   'instalacao-de-bomba-pressurizadora': 'Bomba instalada em reservatório de concreto',
-  impermeabilizacao: 'Reservatório de concreto impermeabilizado com bomba instalada',
   'instalacao-de-filtro': 'Filtro de água instalado na entrada da tubulação',
 };
 
