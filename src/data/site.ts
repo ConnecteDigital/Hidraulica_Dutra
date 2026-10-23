@@ -24,3 +24,6 @@ export const DEFAULT_WHATSAPP_MESSAGE =
 export function whatsappUrl(message: string = DEFAULT_WHATSAPP_MESSAGE) {
   return `https://api.whatsapp.com/send?phone=${site.phoneDigits}&text=${encodeURIComponent(message)}`;
 }
+
+// Tag do Google (gtag.js) instalada em todas as páginas
+export const googleTagId = 'GT-NGJW7BSZ';
