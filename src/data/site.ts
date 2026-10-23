@@ -4,8 +4,9 @@
 const PHONE_DIGITS = '5511983232890';
 
 export const site = {
-  name: 'Hidráulica Dutra',
-  legalName: 'Dutra Hidráulica',
+  name: 'Dutra Hidráulica',
+  // nome antigo, mantido como nome alternativo para o Google (domínio hidraulicadutra.com.br)
+  legalName: 'Hidráulica Dutra',
   url: 'https://hidraulicadutra.com.br',
   city: 'São Paulo',
   state: 'SP',
@@ -19,7 +20,7 @@ export const site = {
 };
 
 export const DEFAULT_WHATSAPP_MESSAGE =
-  'Olá! Vim pelo site da Hidráulica Dutra e preciso de um encanador.';
+  'Olá! Vim pelo site da Dutra Hidráulica e preciso de um encanador.';
 
 export function whatsappUrl(message: string = DEFAULT_WHATSAPP_MESSAGE) {
   return `https://api.whatsapp.com/send?phone=${site.phoneDigits}&text=${encodeURIComponent(message)}`;

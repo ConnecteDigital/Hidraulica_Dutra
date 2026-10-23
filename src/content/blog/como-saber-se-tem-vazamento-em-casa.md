@@ -34,4 +34,4 @@ Pingue algumas gotas de corante (ou café) na caixa acoplada e não dê descarga
 
 Se algum sinal apareceu, o ideal é chamar um encanador para localizar o ponto exato do vazamento antes de quebrar qualquer parede. Quanto antes o conserto, menor o estrago.
 
-A Hidráulica Dutra atende 24 horas em São Paulo, com chegada em até 20 minutos e garantia no serviço.
+A Dutra Hidráulica atende 24 horas em São Paulo, com chegada em até 20 minutos e garantia no serviço.

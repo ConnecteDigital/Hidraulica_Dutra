@@ -40,7 +40,7 @@ const faq = [
   },
   {
     q: 'O serviço tem garantia?',
-    a: 'Sim. Todos os serviços da Hidráulica Dutra têm garantia.',
+    a: 'Sim. Todos os serviços da Dutra Hidráulica têm garantia.',
   },
 ];
 const outrosBairros = bairros.filter((b) => b.slug !== bairro.slug);
@@ -48,7 +48,7 @@ const msg = `Olá! Vim pelo site e preciso de um encanador em ${bairro.nome}.`;
 ---
 
 <Base
-  title={`Encanador em ${bairro.nome} 24h | Chegamos em ${site.arrivalMinutes} min | Hidráulica Dutra`}
+  title={`Encanador em ${bairro.nome} 24h | Chegamos em ${site.arrivalMinutes} min | Dutra Hidráulica`}
   description={`Encanador em ${bairro.nome}, ${bairro.zona} de São Paulo. Vazamentos, desentupimento, conserto de cano e registro 24 horas. Chegamos em até ${site.arrivalMinutes} minutos, com garantia.`}
   schema={[faqSchema(faq), breadcrumbSchema(crumbs)]}
 >
@@ -58,7 +58,7 @@ const msg = `Olá! Vim pelo site e preciso de um encanador em ${bairro.nome}.`;
       <span class="eyebrow">{bairro.zona} · São Paulo</span>
       <h1>Encanador em {bairro.nome} 24 horas</h1>
       <p class="hero-lead">
-        Precisa de encanador em {bairro.nome}? A Hidráulica Dutra atende 24 horas e chega em até {site.arrivalMinutes} minutos
+        Precisa de encanador em {bairro.nome}? A Dutra Hidráulica atende 24 horas e chega em até {site.arrivalMinutes} minutos
         para resolver vazamentos, entupimentos e consertos hidráulicos com garantia.
       </p>
       <CtaButtons message={msg} />

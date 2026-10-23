@@ -5,7 +5,7 @@ import type { ImageMetadata } from 'astro';
 const arquivos = import.meta.glob<{ default: ImageMetadata }>('../assets/fotos/*.jpg', { eager: true });
 
 const alts: Record<string, string> = {
-  desentupimento: 'Encanador da Hidráulica Dutra usando máquina de desentupimento em um imóvel',
+  desentupimento: 'Encanador da Dutra Hidráulica usando máquina de desentupimento em um imóvel',
   'conserto-de-tubulacao-pvc': 'Conserto de tubulação PVC embutida com registro novo instalado na parede',
   'furo-em-cano-pvc': 'Cano PVC furado consertado com conexões novas dentro da parede',
   'furo-em-cano-de-cobre': 'Canos de cobre emendados com luvas de latão após conserto de furo',
@@ -32,5 +32,5 @@ export interface Foto {
 export function fotoDoServico(slug: string): Foto | undefined {
   const mod = arquivos[`../assets/fotos/${slug}.jpg`];
   if (!mod) return undefined;
-  return { src: mod.default, alt: alts[slug] ?? 'Serviço realizado pela Hidráulica Dutra' };
+  return { src: mod.default, alt: alts[slug] ?? 'Serviço realizado pela Dutra Hidráulica' };
 }

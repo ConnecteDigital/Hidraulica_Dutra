@@ -1,4 +1,4 @@
-# Hidráulica Dutra · site
+# Dutra Hidráulica · site
 
 Site institucional com foco em SEO local (encanador 24h em São Paulo). Feito com [Astro](https://astro.build), gera páginas estáticas e é publicado na Vercel.
 

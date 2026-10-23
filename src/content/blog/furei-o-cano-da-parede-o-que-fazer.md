@@ -35,4 +35,4 @@ O conserto correto é abrir a parede apenas em volta do furo e **trocar o trecho
 
 Na maioria dos casos, o reparo é feito em uma única visita. Depois, basta fechar a parede e refazer o acabamento.
 
-Se você furou um cano agora, feche o registro e chame a Hidráulica Dutra: atendemos 24 horas em São Paulo e chegamos em até 20 minutos.
+Se você furou um cano agora, feche o registro e chame a Dutra Hidráulica: atendemos 24 horas em São Paulo e chegamos em até 20 minutos.

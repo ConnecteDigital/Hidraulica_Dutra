@@ -31,7 +31,7 @@ export const servicos: Servico[] = [
     icon: 'drain',
     destaque: true,
     intro: [
-      'Entupimento não escolhe hora. Água voltando pelo ralo, vaso que não desce, pia da cozinha parada com gordura: a Hidráulica Dutra atende 24 horas, inclusive fins de semana e feriados, em toda a cidade de São Paulo.',
+      'Entupimento não escolhe hora. Água voltando pelo ralo, vaso que não desce, pia da cozinha parada com gordura: a Dutra Hidráulica atende 24 horas, inclusive fins de semana e feriados, em toda a cidade de São Paulo.',
       'Usamos equipamentos próprios para cada tipo de obstrução, como máquinas de cabo rotativo e desentupidores de pressão, para resolver o problema sem quebrar piso nem parede sempre que possível.',
     ],
     sinais: [
@@ -58,7 +58,7 @@ export const servicos: Servico[] = [
       },
       {
         q: 'Desentupimento tem garantia?',
-        a: 'Sim, todo serviço da Hidráulica Dutra sai com garantia.',
+        a: 'Sim, todo serviço da Dutra Hidráulica sai com garantia.',
       },
     ],
   },
@@ -108,7 +108,7 @@ export const servicos: Servico[] = [
     icon: 'drop',
     intro: [
       'Furar um cano ao pendurar um quadro, instalar uma prateleira ou fixar um móvel é um dos chamados mais comuns. A água começa a sair pela parede e é preciso agir rápido para evitar estragos.',
-      'Primeiro feche o registro geral. Depois chame a Hidráulica Dutra: chegamos em até 20 minutos, abrimos o mínimo necessário e trocamos o trecho perfurado com conexões adequadas.',
+      'Primeiro feche o registro geral. Depois chame a Dutra Hidráulica: chegamos em até 20 minutos, abrimos o mínimo necessário e trocamos o trecho perfurado com conexões adequadas.',
     ],
     sinais: [
       'Água saindo pelo furo da broca ou do prego',

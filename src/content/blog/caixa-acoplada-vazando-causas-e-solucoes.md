@@ -31,4 +31,4 @@ Ajustes simples, como regular a boia, até dá. Mas a troca de mecanismos exige 
 
 Na grande maioria dos casos, o conserto é feito na hora, sem precisar trocar o vaso.
 
-Precisa consertar a caixa acoplada? A Hidráulica Dutra atende 24 horas em São Paulo e chega em até 20 minutos.
+Precisa consertar a caixa acoplada? A Dutra Hidráulica atende 24 horas em São Paulo e chega em até 20 minutos.

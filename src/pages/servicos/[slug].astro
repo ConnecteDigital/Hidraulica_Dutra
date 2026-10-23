@@ -40,7 +40,7 @@ const msg = `Olá! Vim pelo site e preciso de ${servico.nome.toLowerCase()}.`;
 ---
 
 <Base
-  title={`${servico.keyword} 24h | Hidráulica Dutra`}
+  title={`${servico.keyword} 24h | Dutra Hidráulica`}
   description={servico.metaDescription}
   schema={[serviceSchema(servico), faqSchema(faq), breadcrumbSchema(crumbs)]}
 >
@@ -63,7 +63,7 @@ const msg = `Olá! Vim pelo site e preciso de ${servico.nome.toLowerCase()}.`;
           foto && (
             <figure class="service-figure">
               <Image src={foto.src} alt={foto.alt} widths={[480, 800, 1100]} sizes="(max-width: 960px) 100vw, 760px" />
-              <figcaption>{servico.nome}: serviço realizado pela Hidráulica Dutra em São Paulo.</figcaption>
+              <figcaption>{servico.nome}: serviço realizado pela Dutra Hidráulica em São Paulo.</figcaption>
             </figure>
           )
         }
@@ -74,7 +74,7 @@ const msg = `Olá! Vim pelo site e preciso de ${servico.nome.toLowerCase()}.`;
         <h2>Como fazemos o serviço</h2>
         <ol>{servico.comoFazemos.map((s) => <li>{s}</li>)}</ol>
 
-        <h2>Por que chamar a Hidráulica Dutra</h2>
+        <h2>Por que chamar a Dutra Hidráulica</h2>
         <ul>
           <li>Atendimento 24 horas, inclusive fins de semana e feriados</li>
           <li>Chegada em até {site.arrivalMinutes} minutos</li>
