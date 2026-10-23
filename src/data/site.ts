@@ -27,3 +27,6 @@ export function whatsappUrl(message: string = DEFAULT_WHATSAPP_MESSAGE) {
 
 // Tag do Google (gtag.js) instalada em todas as páginas
 export const googleTagId = 'GT-NGJW7BSZ';
+
+// Contêiner do Google Tag Manager (conversões são configuradas nele)
+export const gtmId = 'GTM-KMZCXL8X';
