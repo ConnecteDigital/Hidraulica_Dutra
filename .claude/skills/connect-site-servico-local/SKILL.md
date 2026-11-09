@@ -16,7 +16,7 @@ Fale com o usuário em português do Brasil, direto e sem jargão. Ele é gestor
 3. **Fotos reais** — o cliente sobe em `fotos/<slug-do-serviço>/`; `scripts/fotos.mjs` otimiza no build. Confira cada foto (foto repetida, foto no serviço errado, marca d'água).
 4. **Abertura animada** — cena 3D gravada em vídeo, NÃO 3D ao vivo. Ver `references/abertura-video.md` (inclui por quê).
 5. **Publicar** — Vercel ligada ao GitHub; cada push na branch publica. Domínio no projeto da Vercel.
-6. **Rastreamento** — instalar GTM (head + noscript no body) e/ou gtag que o cliente mandar. Conversões = clique em `api.whatsapp.com` e em `tel:`. Ver `references/google-ads.md#conversoes`.
+6. **Rastreamento** — instalar SÓ o GTM (script no head + noscript logo após o body). Nunca colar a tag do Google (gtag.js) no código: ela fica dentro do GTM. Conversões = clique em `api.whatsapp.com` e em `tel:`. Ver `references/google-ads.md#conversoes`.
 7. **Google Ads** — analisar relatório de termos de pesquisa da conta antiga (`scripts/analisar_termos.py`), gerar negativas nas 3 correspondências, palavras-chave, 15 títulos, 4 descrições, 6 sitelinks, e relatório antes × depois. Ver `references/google-ads.md`.
 
 ## Regras que valem sempre

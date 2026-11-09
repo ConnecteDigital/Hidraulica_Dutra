@@ -34,7 +34,7 @@ Gere o arquivo .txt com um script (dedup) e envie para o usuário colar.
 
 ## Conversões {#conversoes}
 
-No GTM: Vinculador de conversões (All Pages); acionadores "Clique - Apenas links" com Click URL contém `api.whatsapp.com` e começa com `tel:`; tags de conversão do Google Ads com ID/rótulo de cada ação. Se o site também tem gtag com o mesmo ID, não duplicar a Tag do Google dentro do GTM. Testar no modo Visualizar (pular a abertura).
+No GTM: Vinculador de conversões (All Pages); acionadores "Clique - Apenas links" com Click URL contém `api.whatsapp.com` e começa com `tel:`; tags de conversão do Google Ads com ID/rótulo de cada ação. Rastreamento SÓ pelo GTM: não colar a tag do Google (gtag.js) direto no código do site. Com gtag no código e a mesma conta no GTM, a conversão do clique no WhatsApp deixou de chegar ao Google Ads (caso Dutra). Testar no modo Visualizar (pular a abertura).
 
 ## Relatório para o cliente
 

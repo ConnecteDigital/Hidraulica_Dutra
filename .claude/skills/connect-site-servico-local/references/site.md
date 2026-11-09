@@ -19,13 +19,13 @@ Astro 5 estático + Vercel. Sem framework de UI. Fontes via @fontsource (Barlow 
 
 | Arquivo | O que tem |
 |---|---|
-| `src/data/site.ts` | nome, telefone, tempo de chegada, descrição, `whatsappUrl()`, IDs de GTM/gtag |
+| `src/data/site.ts` | nome, telefone, tempo de chegada, descrição, `whatsappUrl()`, ID do GTM |
 | `src/data/servicos.ts` | cada serviço: slug, nome, keyword (H1), resumo, metaDescription, ícone, intro, sinais, comoFazemos, FAQ |
 | `src/data/bairros.ts` | bairro, zona, texto exclusivo, vizinhos (gera `/encanador-em-<bairro>/`) |
 | `src/data/fotos.ts` | `alt` de cada foto por slug |
 | `src/data/schema.ts` | JSON-LD: LocalBusiness (tipo do nicho, ex. `Plumber`), FAQPage, BreadcrumbList, Service |
 | `src/components/IntroVideo.astro` | abertura em vídeo |
-| `src/components/GoogleTagManager.astro`, `GoogleTag.astro` | rastreamento |
+| `src/components/GoogleTagManager.astro` | rastreamento (só GTM; não colar gtag no código) |
 
 Ao trocar de nicho, renomeie a rota de bairro (`encanador-em-[slug].astro` → `desentupidora-em-[slug].astro` etc.) e os textos fixos das páginas.
 

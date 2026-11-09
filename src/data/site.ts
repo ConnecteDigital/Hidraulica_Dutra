@@ -26,8 +26,5 @@ export function whatsappUrl(message: string = DEFAULT_WHATSAPP_MESSAGE) {
   return `https://api.whatsapp.com/send?phone=${site.phoneDigits}&text=${encodeURIComponent(message)}`;
 }
 
-// Tag do Google (gtag.js) instalada em todas as páginas
-export const googleTagId = 'GT-NGJW7BSZ';
-
-// Contêiner do Google Tag Manager (conversões são configuradas nele)
+// Contêiner do Google Tag Manager: único rastreamento do site (tag do Google e conversões ficam nele)
 export const gtmId = 'GTM-KMZCXL8X';
